@@ -1246,6 +1246,10 @@ function calcLightingPrice() {
   return 8 * getSqft();
 }
 
+function calcTunableLightingPrice() {
+  return 17 * getSqft();
+}
+
 // Additional rooms pricing:
 // Rooms that land on position 1, 5, 9, 13... (index % 4 === 0) → $5,950
 // All other rooms → $2,215
@@ -1328,14 +1332,22 @@ const CATEGORIES = [
   {
     id: 'lighting',
     icon: '💡',
-    name: 'Lighting Controls',
+    name: 'Lighting and Controls',
     desc: 'Crestron whole-home lighting control, scene programming and commissioning.',
     features: [
       {
         id: 'l1',
         name: 'Crestron Lighting Allowance',
-        detail: 'Allowance for Crestron Lighting — priced at $8 per sq ft.',
+        detail: 'Allowance for Crestron Controls of Standard Fixtures — priced at $8 per sq ft.',
         dynamicPrice: calcLightingPrice,
+        unit: 'system',
+        hasQty: false
+      },
+      {
+        id: 'l2',
+        name: 'Crestron Tunable Lighting Allowance',
+        detail: 'Allowance for Crestron Controls of Tunable DMF Fixtures — priced at $17 per sq ft.',
+        dynamicPrice: calcTunableLightingPrice,
         unit: 'system',
         hasQty: false
       }
@@ -2207,6 +2219,9 @@ function toggleFeature(fid) {
     }
   } else {
     state.selectedFeatures[fid] = { qty: f.qty || 1 };
+    // Lighting options are mutually exclusive — selecting one deselects the other
+    if (fid === 'l1') delete state.selectedFeatures['l2'];
+    if (fid === 'l2') delete state.selectedFeatures['l1'];
   }
 
   // Surgical update for video items — patch in place, no full re-render
